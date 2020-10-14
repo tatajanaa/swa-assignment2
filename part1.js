@@ -138,7 +138,7 @@ var to = new Date(2020, 9, 15, 00,00,00)
 
 let di = new DateInterval(from, to)
 
-//console.log(h.lowestValue())
+console.log(h.lowestValue())
 //console.log(h.forPeriod(di))
 //console.log(h.convertToInternationalUnits())
 
