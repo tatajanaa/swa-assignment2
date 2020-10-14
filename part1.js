@@ -1,4 +1,13 @@
 
+  
+  const convertToF =  (value) => Math.round((value * (9 / 5)) + 32)
+  const convertToC =  (value) => Math.round((value - 32) * (9 / 5))
+  const convertToMM = (value) => value * 25.4
+  const convertToInches = (value) => value / 25.4;
+  const convertToMPH = (value) => value  * 2.2369362920544
+  const convertToMS = (value) => value * 0.44704
+
+
 class DateInterval{
     constructor(from, to){
         this.from = from
@@ -6,8 +15,8 @@ class DateInterval{
     }
 
 }
-let containsDate = function (d, di) {
-   return d >= di.from && d <= di.to
+let containsDate = function (d, interval) {
+   return d >= interval.from && d <= interval.to
 }
 
 
@@ -37,10 +46,13 @@ class WeatherHistory {
 
  }
 
+
 WeatherHistory.prototype.including = function (weatherData) {this.data.push(weatherData)}
 
+WeatherHistory.prototype.data = function(){return data}
+
 WeatherHistory.prototype.forPlace = function (newPlace){
-    return this.data.filter(item => item.place === newPlace);   
+      return this.data.filter(item => item.place === newPlace);   
 }
 
 WeatherHistory.prototype.forType = function (newType){
@@ -81,16 +93,6 @@ WeatherHistory.prototype.convertToInternationalUnits = function (){
   }
 
 
-
-  
-  const convertToF =  (value) => Math.round((value * (9 / 5)) + 32)
-  const convertToC =  (value) => Math.round((value - 32) * (9 / 5))
-  const convertToMM = (value) => value * 25.4
-  const convertToInches = (value) => value / 25.4;
-  const convertToMPH = (value) => value  * 2.2369362920544
-  const convertToMS = (value) => value * 0.44704
-
-
 const convert=function(element){
    
     switch (element.type) {
@@ -116,9 +118,68 @@ const convert=function(element){
 }
 
 
+class WeatherPrediction {
+    constructor(from, to, weatherData){
+        this.from = from
+        this.to = to
+        this.weatherData = weatherData
+    }
+}
 
+WeatherPrediction.prototype.matches = function () {
+    let isMatch = false
+    if(this.weatherData.value.value <= this.to && this.weatherData.value.value >= this.from) {
+        isMatch = true;
+    }
+    return isMatch
+}
 
+class WeatherForecast {
+    data;
+    constructor() {
+         this.data =  []
+    }
+ }
 
+ WeatherForecast.prototype.including = function (weatherPrediction) {this.data.push(weatherPrediction)}
+
+ WeatherForecast.prototype.data = function(){return data}
+ 
+ WeatherForecast.prototype.forPlace = function (newPlace){
+       return this.data.filter(item => item.place === newPlace);   
+ }
+ 
+ WeatherForecast.prototype.forType = function (newType){
+     return this.data.filter(item => item.type === newType);  
+ }
+ 
+ WeatherForecast.prototype.forPeriod = function (period){
+      return this.data.filter(item=> containsDate(item.time, period))
+ }
+ 
+ 
+ 
+ WeatherForecast.prototype.convertToUsUnits = function (){
+   this.data.filter(item => item.unit === 'INT').map(item=>convert(item))
+   return this.data
+ 
+ }
+ 
+ WeatherForecast.prototype.convertToInternationalUnits = function (){
+     this.data.filter(item => item.unit === 'US').map(item=>convert(item))
+     return this.data
+   
+   }
+
+WeatherForecast.prototype.averageFromValue = function (){
+     let from =  this.data.map(item=>item.from)
+        return from.reduce((a, b) => (a + b)) / from.length;
+   }
+
+   WeatherForecast.prototype.averageToValue = function (){
+    let to =  this.data.map(item=>item.to)
+       return to.reduce((a, b) => (a + b)) / to.length;
+  }
 
 let h = new WeatherHistory({data: []})
 
@@ -131,6 +192,16 @@ h.including(e)
 h.including(b)
 h.including(c) 
 
+let wf = new WeatherForecast({data: []})
+
+let wp = new WeatherPrediction(13,25,e)
+let wp1 = new WeatherPrediction(0,250,b)
+let wp2 = new WeatherPrediction(13,25,c)
+
+wf.including(wp)
+wf.including(wp1)
+wf.including(wp2)
+
 
 var from = new Date(2020, 9, 01, 00,00,00)
 var to = new Date(2020, 9, 15, 00,00,00)
@@ -138,7 +209,7 @@ var to = new Date(2020, 9, 15, 00,00,00)
 
 let di = new DateInterval(from, to)
 
-console.log(h.lowestValue())
+//console.log(h.lowestValue())
 //console.log(h.forPeriod(di))
 //console.log(h.convertToInternationalUnits())
 
