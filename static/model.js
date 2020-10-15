@@ -107,25 +107,38 @@ const model = (data, forecast, horsens, copenhagen, aarhus) => {
 
     const getLatestMeasurement = function(){
       
-        let  t =JSON.stringify(data.filter(item => item.type==='temperature').slice(- 1))
-        let  p =JSON.stringify(data.filter(item => item.type==='precipitation').slice(- 1))
-        let  w =JSON.stringify(data.filter(item => item.type==='wind speed').slice(- 1))
-        let  c =JSON.stringify(data.filter(item => item.type==='cloud coverage').slice(- 1))
+        let  tH =JSON.stringify(horsens.filter(item => item.type==='temperature').slice(- 1))
+        let  pH =JSON.stringify(horsens.filter(item => item.type==='precipitation').slice(- 1))
+        let  wH =JSON.stringify(horsens.filter(item => item.type==='wind speed').slice(- 1))
+        let  cH =JSON.stringify(horsens.filter(item => item.type==='cloud coverage').slice(- 1))
         
+        let  tC =JSON.stringify(copenhagen.filter(item => item.type==='temperature').slice(- 1))
+        let  pC =JSON.stringify(copenhagen.filter(item => item.type==='precipitation').slice(- 1))
+        let  wC =JSON.stringify(copenhagen.filter(item => item.type==='wind speed').slice(- 1))
+        let  cC =JSON.stringify(copenhagen.filter(item => item.type==='cloud coverage').slice(- 1))
+
+        let  tA =JSON.stringify(aarhus.filter(item => item.type==='temperature').slice(- 1))
+        let  pA =JSON.stringify(aarhus.filter(item => item.type==='precipitation').slice(- 1))
+        let  wA =JSON.stringify(aarhus.filter(item => item.type==='wind speed').slice(- 1))
+        let  cA =JSON.stringify(aarhus.filter(item => item.type==='cloud coverage').slice(- 1))
 
      
-        return  t+p+w+c
+        return       `Latest measurements were: Horsens----------->  ${tH} ${pH} ${wH} ${cH} ,
+        Copenhagen-------------> ${tC+pC+wC+cC}, Arhus--------------> ${tA+pA+wA+cA} `
     }
     //Hourly predictions for the next 24 hours.
     const getHourlyPredictions = function(){
-    
-       let c= forecast.filter(item=> new Date(item.time)>=new Date())
+  
+       let horsens= forecast.filter(item=> new Date(item.time)>=new Date()).filter(item=>item.place==='Horsens')
+       let cph= forecast.filter(item=> new Date(item.time)>=new Date()).filter(item=>item.place==='Copenhagen')
+       let aarhus= forecast.filter(item=> new Date(item.time)>=new Date()).filter(item=>item.place==='Aarhus')
       
-       
-      console.log(new Date());
-
-     //console.log(c)
-        return c
+        const uniqueHoursHorsens = _.uniqBy(horsens, item =>new Date(item.time).getHours())
+        const uniqueHoursCph = _.uniqBy(cph, item =>new Date(item.time).getHours())
+        const uniqueHoursArhus = _.uniqBy(aarhus, item =>new Date(item.time).getHours())
+     
+        return       `Hourly predictions for the next 24 hours: Horsens: ${JSON.stringify(uniqueHoursHorsens)},
+        Copenhagen: ${JSON.stringify(uniqueHoursCph)}, Arhus: ${JSON.stringify(uniqueHoursArhus)} `
     }
 
     return {allWeatherData, getMinTemperature, getMaxTemperature,
