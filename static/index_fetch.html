@@ -1,0 +1,32 @@
+<html>
+<head> 
+ 
+<script type = 'module'>
+    import model from './model.js'
+     import view from './view.js'
+    
+    window.init = function() {
+        Promise.all([fetch('http://localhost:8080/data'), 
+        fetch('http://localhost:8080/forecast'), 
+        fetch('http://localhost:8080/data/Horsens'),
+        fetch('http://localhost:8080/data/Copenhagen'),
+        fetch('http://localhost:8080/data/Aarhus')
+    ])
+        .then(res => res.map(r => r.json()))
+        .then(r => Promise.all(r))
+        .then(([data, forecast, horsens, copenhagen, aarhus]) => {
+            const theModel = model(data, forecast, horsens, copenhagen, aarhus)
+            const theView = view(window)
+            theView.update(theModel)
+        })
+        .catch(console.error)
+    }
+</script>
+</head>
+<body onload="init()">
+    <div id='base'>
+        <h1>Weather Data</h1>
+        <div id='weather_data'></div>
+    </div>
+</body>
+</html>
