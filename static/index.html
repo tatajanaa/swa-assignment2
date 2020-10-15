@@ -1,0 +1,55 @@
+<html>
+<head> 
+  
+    <script type = 'module'>
+        import model from './model.js'
+        import view from './view.js'
+
+        window.init = function() {
+            const request = new XMLHttpRequest()
+            request.open('GET', 'http://localhost:8080/data')
+            request.send()
+            request.onload = () => {
+                const weatherdata = JSON.parse(request.responseText)
+                request.open('GET', 'http://localhost:8080/forecast')
+                request.send()           
+                request.onload = () => {             
+                    const forecast = JSON.parse(request.responseText)
+                    request.open('GET', 'http://localhost:8080/data/Horsens')
+                    request.send()
+                    request.onload = () => { 
+                        const horsens = JSON.parse(request.responseText)
+                        request.open('GET', 'http://localhost:8080/data/Copenhagen')
+                        request.send()
+                        request.onload = () => {
+                            const cph = JSON.parse(request.responseText)
+                            request.open('GET', 'http://localhost:8080/data/Aarhus')
+                            request.send()
+                            request.onload = () => {
+                            
+                            const aarhus = JSON.parse(request.responseText)  
+                            const theModel = model(weatherdata, forecast, horsens, cph, aarhus)
+                            const theView = view(window)
+                            theView.update(theModel)
+                            }
+                       
+                        }
+
+                     }
+                   
+                }
+            }
+        }
+    
+        
+       
+                
+    </script>
+</head>
+<body onload="init()">
+    <div id='base'>
+        <h1>Weather Data</h1>
+        <div id='weather_data'></div>
+    </div>
+</body>
+</html>
