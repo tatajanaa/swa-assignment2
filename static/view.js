@@ -55,13 +55,13 @@ const MinTemp = p => {
      const GetLatestMeasurement =p =>{
         console.log('p is '+p)
         const paragraph = weatherDataDiv.appendChild(document.createElement('p'))
-        paragraph.appendChild(document.createTextNode('Lates measurements were: ' + p))
+        paragraph.appendChild(document.createTextNode( p))
      }
 
      const GetHourlyPredictions = p =>{
-        console.log('p is '+p)
+       
         const paragraph = weatherDataDiv.appendChild(document.createElement('p'))
-        paragraph.appendChild(document.createTextNode('Hourly predictions for the next 24 hours: ' + p))
+        paragraph.appendChild(document.createTextNode(p))
      }
 
 
@@ -74,7 +74,7 @@ const MinTemp = p => {
         GetAverageCloudCoverage(model.getAverageCloud())
         GetDominantWindDirection(model.getDominantWindDirection())
         GetLatestMeasurement(model.getLatestMeasurement())
-        //GetHourlyPredictions(model.getHourlyPredictions())
+        GetHourlyPredictions(model.getHourlyPredictions())
         //model.allWeatherData().forEach(displayAllWeatherDataItem)
        }
       
