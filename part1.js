@@ -1,32 +1,30 @@
-
-  
-  const convertToF =  (value) => Math.round((value * (9 / 5)) + 32)
+ const convertToF =  (value) => Math.round((value * (9 / 5)) + 32)
   const convertToC =  (value) => Math.round((value - 32) * (9 / 5))
   const convertToMM = (value) => value * 25.4
   const convertToInches = (value) => value / 25.4;
   const convertToMPH = (value) => value  * 2.2369362920544
   const convertToMS = (value) => value * 0.44704
-
-
+ 
+ 
 class DateInterval{
     constructor(from, to){
         this.from = from
         this.to = to
     }
-
+ 
 }
 let containsDate = function (d, interval) {
    return d >= interval.from && d <= interval.to
 }
-
-
+ 
+ 
 class Event {
     constructor(time, place) {
         this.time =  time
         this.place = place
     }
 }
-
+ 
 class WeatherData extends Event {
     constructor(value, time, place, type, unit) {
         super(time, place)
@@ -34,75 +32,40 @@ class WeatherData extends Event {
         this.unit = unit
         this.type=type
     }
-
+ 
 }
+ 
+function weatherHistory(_data) {
+    const data = [..._data] 
+    const getData = () => [...data]
+    const including = weatherData => weatherHistory( [...data, weatherData])
+    const forPlace = (newPlace) => weatherHistory( data.filter(item => item.place === newPlace))
+    const forType = newType => weatherHistory( data.filter(item => item.type === newType))
+    const forPeriod = period => weatherHistory( data.filter(item=> containsDate(item.time, period)))
 
-class WeatherHistory {
-    data;
-    constructor() {
-         this.data =  []
-    }
-  
-
- }
-
-
-WeatherHistory.prototype.including = function (weatherData) {this.data.push(weatherData)}
-
-WeatherHistory.prototype.data = function(){return data}
-
-WeatherHistory.prototype.forPlace = function (newPlace){
-      return this.data.filter(item => item.place === newPlace);   
-}
-
-WeatherHistory.prototype.forType = function (newType){
-    return this.data.filter(item => item.type === newType);  
-}
-
-WeatherHistory.prototype.forPeriod = function (period){
-     return this.data.filter(item=> containsDate(item.time, period))
-}
-
-WeatherHistory.prototype.lowestValue = function() {
-
-    if(!this.data.length || !WeatherHistory ){  
-        return undefined
-    }
-
-    else if(!this.data.map(item=>item.type).reduce(function(a,b){return(a === b)? a : undefined})){
-
-         return undefined
-   
-    }
-    else 
-        return Math.min(...this.data.map(item=>item.value.value))
-   
-}
-
-
-WeatherHistory.prototype.convertToUsUnits = function (){
-  this.data.filter(item => item.unit === 'INT').map(item=>convert(item))
-  return this.data
-
-}
-
-WeatherHistory.prototype.convertToInternationalUnits = function (){
-    this.data.filter(item => item.unit === 'US').map(item=>convert(item))
-    return this.data
-  
-  }
-
+    const lowestValue = () => (data.lenght != 0 || 
+                                !weatherHistory || 
+                                 !(data.map(item=>item.type).reduce(function(a,b){return(a === b)? a : undefined}) )
+        ? (Math.min(...data.map(item=>item.value.value)) )
+        :undefined  )
+    
+        const convertToUsUnits = () => weatherHistory([...data], data.filter(item => item.unit === 'INT').map(item=>convert(item)))
+ 
+        const convertToInternationalUnits = () => weatherHistory([...data], data.filter(item => item.unit === 'US').map(item=>convert(item)))
+     
+        return { getData, including, forPlace, forType, forPeriod, lowestValue, convertToUsUnits, convertToInternationalUnits}
+} 
 
 const convert=function(element){
-   
+ 
     switch (element.type) {
         case 'temp':
             element.unit === 'INT'
              ? (element.value.value=convertToF(element.value.value), element.unit='US') 
              : (element.value.value=convertToC(element.value.value), element.unit='INT')    
-           
+                console.log(element.value.value)
             break;
-        case 'precipitation':
+         case 'precipitation':
             element.unit === 'INT'
             ? (element.value.value=convertToInches(element.value.value), element.unit='US') 
             : (element.value.value=convertToMM(element.value.value), element.unit='INT')  
@@ -117,101 +80,91 @@ const convert=function(element){
     }
 }
 
-
 class WeatherPrediction {
     constructor(from, to, weatherData){
         this.from = from
         this.to = to
         this.weatherData = weatherData
+    
     }
 }
 
-WeatherPrediction.prototype.matches = function () {
+function matches(to, from, weatherData){
     let isMatch = false
-    if(this.weatherData.value.value <= this.to && this.weatherData.value.value >= this.from) {
+    if(weatherData.value.value <= to && weatherData.value.value >= from) {
         isMatch = true;
     }
     return isMatch
 }
 
-class WeatherForecast {
-    data;
-    constructor() {
-         this.data =  []
-    }
- }
 
- WeatherForecast.prototype.including = function (weatherPrediction) {this.data.push(weatherPrediction)}
+function weatherForecast (_data) {
+    const data = [..._data] 
+    const getData = () => [...data]
+    const including = weatherPrediction => weatherForecast( [...data, weatherPrediction])
+    const forPlace = (newPlace) => weatherForecast( (data.map(item=>item.weatherData).filter(item => item.place === newPlace)))
+    const forType = newType => weatherForecast( data.map(item=>item.weatherData).filter(item => item.type === newType))
+    const forPeriod = period => weatherForecast( data.map(item=>item.weatherData).filter(item=> containsDate(item.time, period)))
 
- WeatherForecast.prototype.data = function(){return data}
+    const averageFromValue =  () => ((data.map(item=>item.from).reduce((a, b) => (a + b)) /(data.map(item=>item.from).length)))
+      
+    const averageToValue =  () => ((data.map(item=>item.to).reduce((a, b) => (a + b)) /(data.map(item=>item.to).length)))
+     
+    const convertToUsUnits = () => weatherHistory([...data], data.map(item=>item.weatherData).filter(item => item.unit === 'INT').map(item=>convert(item)))
  
- WeatherForecast.prototype.forPlace = function (newPlace){
-       return this.data.filter(item => item.place === newPlace);   
- }
- 
- WeatherForecast.prototype.forType = function (newType){
-     return this.data.filter(item => item.type === newType);  
- }
- 
- WeatherForecast.prototype.forPeriod = function (period){
-      return this.data.filter(item=> containsDate(item.time, period))
- }
- 
- 
- 
- WeatherForecast.prototype.convertToUsUnits = function (){
-   this.data.filter(item => item.unit === 'INT').map(item=>convert(item))
-   return this.data
- 
- }
- 
- WeatherForecast.prototype.convertToInternationalUnits = function (){
-     this.data.filter(item => item.unit === 'US').map(item=>convert(item))
-     return this.data
+    const convertToInternationalUnits = () => weatherHistory([...data], data.map(item=>item.weatherData).filter(item => item.unit === 'US').map(item=>convert(item)))
    
-   }
-
-WeatherForecast.prototype.averageFromValue = function (){
-     let from =  this.data.map(item=>item.from)
-        return from.reduce((a, b) => (a + b)) / from.length;
-   }
-
-   WeatherForecast.prototype.averageToValue = function (){
-    let to =  this.data.map(item=>item.to)
-       return to.reduce((a, b) => (a + b)) / to.length;
-  }
-
-let h = new WeatherHistory({data: []})
+    return { getData, including, forPlace, forType, forPeriod, averageFromValue, averageToValue, convertToUsUnits, convertToInternationalUnits}
+} 
 
 
-e = new WeatherData({value: 12, subtype: 'north west'}, new Date(2000, 8, 01, 12,00,00)   , 'Horsens', 'temp', 'INT')
-b = new WeatherData({value: -132, subtype: 'rain'}, new Date(2020, 9, 06, 12,00,00), 'Kolding', 'temp', 'INT')
-c = new WeatherData({value:34}, new Date(2020, 9, 07, 12,00,00), 'Horsens', 'temp', 'US')
+let h =  weatherHistory([])
+let w =  weatherForecast([])
 
-h.including(e)
-h.including(b)
-h.including(c) 
 
-let wf = new WeatherForecast({data: []})
 
-let wp = new WeatherPrediction(13,25,e)
-let wp1 = new WeatherPrediction(0,250,b)
-let wp2 = new WeatherPrediction(13,25,c)
+e = new WeatherData({value:12, subtype:'west'}, new Date(2000, 8, 01, 12,00,00), 'Horsens', 'temp', 'INT')
+b =  new WeatherData({value:-112}, new Date(2020, 9, 06, 12,00,00), 'Kolding', 'temp', 'INT')
+c =  new WeatherData({value:32}, new Date(2020, 9, 07, 12,00,00), 'Horsens', 'temp', 'US')
 
-wf.including(wp)
-wf.including(wp1)
-wf.including(wp2)
+h = h.including(e)
+h = h.including(b)
+h = h.including(c)
 
 
 var from = new Date(2020, 9, 01, 00,00,00)
-var to = new Date(2020, 9, 15, 00,00,00)
-
+var to = new Date(2021, 11, 19, 00,00,00)
 
 let di = new DateInterval(from, to)
 
+console.log(matches(10,45,c))
+
+ wp = new WeatherPrediction(10,25,e)
+ wp1 = new WeatherPrediction(0,250,b)
+ wp2 = new WeatherPrediction(13,25,c)
+
+
+w = w.including(wp)
+w = w.including(wp1)
+w = w.including(wp2)
+
+//console.log((w.convertToUsUnits()).getData())
+
+
+//console.log((h.forPlace('Kolding')).getData())
+
+//console.log((h.forType('temp')).getData())
+
+//console.log((h.forPeriod(di)).getData())
+
+
 //console.log(h.lowestValue())
-//console.log(h.forPeriod(di))
-//console.log(h.convertToInternationalUnits())
+
+//console.log((h=h.convertToInternationalUnits()).getData())
+//console.log(h.convertToUsUnits()).getData())
+
+
+
 
 
 
